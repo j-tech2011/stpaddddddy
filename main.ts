@@ -1,3 +1,7 @@
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    vy = -100
+    vx = 0
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     st_patrick,
@@ -73,7 +77,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . f 7 f . . . . . . 
         . . . . . . f 7 f . . . . . . . 
         . . . . . . f f . . . . . . . . 
-        `, st_patrick, 50, 50)
+        `, st_patrick, vx, vy)
     animation.runImageAnimation(
     projectile,
     [img`
@@ -234,8 +238,18 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     false
     )
 })
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    vx = -100
+    vy = 0
+})
 function set_up () {
-    tiles.setCurrentTilemap(tilemap`level1`)
+    if (level == 1) {
+        tiles.setCurrentTilemap(tilemap`level1`)
+    } else if (level == 2) {
+        tiles.setCurrentTilemap(tilemap`level0`)
+    } else {
+    	
+    }
     st_patrick = sprites.create(img`
         . . . . . . f f f f . . . . . . 
         . . . . f f f 6 6 f f f . . . . 
@@ -256,34 +270,63 @@ function set_up () {
         `, SpriteKind.Player)
     controller.moveSprite(st_patrick)
     scene.cameraFollowSprite(st_patrick)
-    snakes(100)
+    enemies = []
+    snakes(snakeAmount)
 }
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    vx = 100
+    vy = 0
+})
 function snakes (num: number) {
     for (let index = 0; index < num; index++) {
         frankie = sprites.create(img`
-            . . . . . . . . . . . c c c c c 
-            . . . . . . . . . c c e 1 e e c 
-            . . . . . . . . c c e e e c c . 
-            . . . . . . . . c e 1 e c . . . 
-            . . . . . . . . c e e 1 c . . . 
-            . . . . . . . . c d e e c c . . 
-            . . . c c c c c c c e e 1 c c . 
-            . . c e e d e e e c c e 1 e c . 
-            . c e d e e e 1 e e c e 1 e c c 
-            c e e e e 1 e e e 1 e c e e e c 
-            c e c e 1 e e c e e e c e 1 e c 
-            f e c c e e e c e e 1 f e e e c 
-            f e e f e e f e e e e f e 1 e c 
-            . f e e e e e e e e e f e e c . 
-            . c e 1 f f 1 e e e f e e c c . 
-            . c c 1 c c 1 c c c c c c . . . 
+            . . . . c c c c c c . . . . . . 
+            . . . c 4 5 5 5 5 4 c . . . . . 
+            . . c 5 5 5 5 5 5 5 5 c . . . . 
+            . c 4 5 5 5 5 5 5 5 5 4 c . . . 
+            . c 5 c 4 4 4 4 c 5 5 5 c . . . 
+            . f 5 4 f 4 4 f 4 5 5 5 f . . . 
+            . f 5 5 5 5 5 5 5 5 5 5 f . . . 
+            . . f 5 5 5 5 4 c 5 5 4 f c . . 
+            . . . f c c c c 5 5 4 f 5 5 c . 
+            . . c 5 2 5 5 5 4 c f 5 5 5 5 c 
+            . c 5 5 2 5 5 c f c 4 5 5 4 c c 
+            c d d d d 5 4 f c c 4 4 4 c . . 
+            f d d d d d 4 4 c 4 4 4 4 f . . 
+            f 4 d d d d d 4 4 4 4 4 c f . . 
+            . f 4 d d d d d d 4 4 4 f . . . 
+            . . c c c c c c c c c f . . . . 
             `, SpriteKind.Enemy)
         tiles.placeOnTile(frankie, tiles.getTileLocation(randint(0, 31), randint(0, 31)))
         frankie.setVelocity(randint(50, 100), randint(50, 100))
         frankie.setBounceOnWall(true)
+        enemies.push(frankie)
     }
 }
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    vy = 100
+    vx = 0
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite, effects.fire, 2000)
+    enemies.pop()
+    info.setScore(enemies.length)
+})
 let frankie: Sprite = null
+let enemies: Sprite[] = []
 let projectile: Sprite = null
 let st_patrick: Sprite = null
+let vx = 0
+let vy = 0
+let snakeAmount = 0
+let level = 0
+level = 1
+snakeAmount = 100
 set_up()
+forever(function () {
+    if (enemies.length == 0) {
+        snakeAmount = snakeAmount * 2
+        level += 1
+        set_up()
+    }
+})
