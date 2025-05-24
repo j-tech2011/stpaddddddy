@@ -245,10 +245,13 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
 function set_up () {
     if (level == 1) {
         tiles.setCurrentTilemap(tilemap`level1`)
+        tiles.placeOnTile(st_patrick, tiles.getTileLocation(29, 33))
     } else if (level == 2) {
         tiles.setCurrentTilemap(tilemap`level0`)
+        tiles.placeOnTile(st_patrick, tiles.getTileLocation(61, 65))
     } else {
-    	
+        tiles.setCurrentTilemap(tilemap`level3`)
+        tiles.placeOnTile(st_patrick, tiles.getTileLocation(125, 129))
     }
     st_patrick = sprites.create(img`
         . . . . . . f f f f . . . . . . 
